@@ -56,7 +56,9 @@
       this.theme = theme;
       this.themeId = theme.id;
       this.gridPattern = null;
+      this.techPattern = null;
       this.screenGrad = null;
+      this.vignetteGrad = null;
       this.buildAssets();
       this.resize();
     }
@@ -192,6 +194,53 @@
         }
       }
 
+      // Malla hexagonal y microcircuitos de la arena.
+      const tech = document.createElement('canvas');
+      tech.width = tech.height = 1024;
+      const hc = tech.getContext('2d');
+      hc.strokeStyle = NS.rgba(C.accent, .055);
+      hc.lineWidth = 1.1;
+      const hr = 34;
+      const hw = Math.sqrt(3) * hr;
+      for (let row = -1; row < 22; row++) {
+        for (let col = -1; col < 18; col++) {
+          const cx = col * hw + (row % 2 ? hw / 2 : 0);
+          const cy = row * hr * 1.5;
+          hc.beginPath();
+          for (let k = 0; k < 6; k++) {
+            const a = Math.PI / 6 + k * TAU / 6;
+            const px = cx + Math.cos(a) * hr;
+            const py = cy + Math.sin(a) * hr;
+            if (k === 0) hc.moveTo(px, py); else hc.lineTo(px, py);
+          }
+          hc.closePath();
+          hc.stroke();
+        }
+      }
+      // Trazas con nodos, deliberadamente escasas para no ensuciar.
+      hc.strokeStyle = NS.rgba(C.accent, .09);
+      hc.lineWidth = 1.25;
+      for (let i = 0; i < 10; i++) {
+        let x = rng() * 1024;
+        let y = rng() * 1024;
+        hc.beginPath();
+        hc.moveTo(x, y);
+        for (let j = 0; j < 4; j++) {
+          if (j % 2 === 0) x += (rng() < .5 ? -1 : 1) * (46 + rng() * 105);
+          else y += (rng() < .5 ? -1 : 1) * (34 + rng() * 84);
+          hc.lineTo(x, y);
+        }
+        hc.stroke();
+        hc.fillStyle = NS.rgba(C.accent, .16);
+        hc.beginPath(); hc.arc(x, y, 2.4, 0, TAU); hc.fill();
+      }
+      this.techTile = tech;
+      this.techPattern = this.ctx.createPattern(tech, 'repeat');
+      if (this.techPattern && this.techPattern.setTransform && window.DOMMatrix) {
+        const s = 720 / 1024;
+        this.techPattern.setTransform(new DOMMatrix([s, 0, 0, s, 0, 0]));
+      }
+
       // Gradiente base de la arena
       this.arenaGrad = this.ctx.createRadialGradient(0, 0, 50, 0, 0, R);
       this.arenaGrad.addColorStop(0, C.arena[0]);
@@ -215,6 +264,7 @@
       this.canvas.style.width = this.w + 'px';
       this.canvas.style.height = this.h + 'px';
       this.screenGrad = null;
+      this.vignetteGrad = null;
     }
 
     viewBounds(pad) {
@@ -310,6 +360,15 @@
       if (this.gridPattern) {
         ctx.fillStyle = this.gridPattern;
         ctx.fillRect(vb.l, vb.t, vb.r - vb.l, vb.b - vb.t);
+      }
+
+      // Textura técnica hexagonal.
+      if (this.techPattern) {
+        ctx.save();
+        ctx.globalAlpha = this.game.quality === 'low' ? .45 : .72;
+        ctx.fillStyle = this.techPattern;
+        ctx.fillRect(vb.l, vb.t, vb.r - vb.l, vb.b - vb.t);
+        ctx.restore();
       }
 
       // Anillos concéntricos
@@ -513,6 +572,23 @@
         const size = f.r * (f.kind === 'chase' ? 8 : f.kind === 'rare' ? 7.2 : 6.1) * pulse * (f.candy ? 1.56 : 1);
         ctx.globalAlpha = f.kind === 'drop' ? clamp(f.life - f.age > 5 ? .95 : (f.life - f.age) / 5 * .95, 0, .95) : .96;
         const sprite = f.candy ? NS.candySprite(f.color, f.candyShape) : NS.orbSprite(f.color);
+        if (f.kind === 'chase') {
+          // Estela de cometa para los orbes que escapan.
+          const vx = Number.isFinite(f.vx) ? f.vx : Math.cos(f.angle || f.phase) * 40;
+          const vy = Number.isFinite(f.vy) ? f.vy : Math.sin(f.angle || f.phase) * 40;
+          const vlen = Math.hypot(vx, vy) || 1;
+          const dx = vx / vlen;
+          const dy = vy / vlen;
+          ctx.globalCompositeOperation = 'lighter';
+          for (let t = 4; t >= 1; t--) {
+            ctx.globalAlpha = .13 * (1 - t / 5.4);
+            const trailSize = size * (1 - t * .13);
+            const tx = f.x - dx * t * 6;
+            const ty = f.y - dy * t * 6;
+            ctx.drawImage(sprite, tx - trailSize / 2, ty - trailSize / 2, trailSize, trailSize);
+          }
+          ctx.globalAlpha = .96;
+        }
         if (f.candy) {
           ctx.globalCompositeOperation = 'source-over';
           ctx.drawImage(sprite, f.x - size / 2, f.y - size / 2, size, size);
@@ -532,6 +608,21 @@
           ctx.arc(f.x, f.y, ring + Math.sin(f.phase * 1.4) * 1.2, 0, TAU);
           ctx.stroke();
           ctx.setLineDash([]);
+          if (f.kind === 'rare') {
+            // Destellos de cuatro puntas.
+            ctx.save();
+            ctx.translate(f.x, f.y);
+            ctx.rotate(time * .8 + f.phase);
+            ctx.globalAlpha = .55 + .25 * Math.sin(time * 4 + f.phase);
+            ctx.fillStyle = '#fff9dc';
+            const sr = f.r * 2.9;
+            ctx.beginPath();
+            ctx.moveTo(0, -sr); ctx.lineTo(1.4, -1.4); ctx.lineTo(sr, 0); ctx.lineTo(1.4, 1.4);
+            ctx.lineTo(0, sr); ctx.lineTo(-1.4, 1.4); ctx.lineTo(-sr, 0); ctx.lineTo(-1.4, -1.4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          }
         }
       }
       ctx.restore();
@@ -548,12 +639,25 @@
         const bob = Math.sin(time * 2.2 + p.phase) * 3;
         const pulse = 1 + Math.sin(time * 3.4 + p.phase) * .07;
         const r = p.r * pulse;
+        // Sombra/base en el suelo: no flota con el objeto.
+        ctx.save();
+        ctx.globalAlpha = .34;
+        const floor = ctx.createRadialGradient(p.x, p.y + r * .82, 0, p.x, p.y + r * .82, r * 1.5);
+        floor.addColorStop(0, NS.rgba(def.color, .24));
+        floor.addColorStop(.6, 'rgba(0,0,0,.22)');
+        floor.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = floor;
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y + r * .82, r * 1.5, r * .42, 0, 0, TAU);
+        ctx.fill();
+        ctx.restore();
+
         ctx.save();
         ctx.translate(p.x, p.y + bob);
         ctx.globalCompositeOperation = 'lighter';
         const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.8);
-        halo.addColorStop(0, NS.rgba(def.color, .3));
-        halo.addColorStop(.5, NS.rgba(def.color, .1));
+        halo.addColorStop(0, NS.rgba(def.color, .34));
+        halo.addColorStop(.5, NS.rgba(def.color, .12));
         halo.addColorStop(1, NS.rgba(def.color, 0));
         ctx.fillStyle = halo;
         ctx.beginPath();
@@ -567,6 +671,30 @@
         ctx.arc(0, 0, r * 1.55, 0, TAU);
         ctx.stroke();
         ctx.setLineDash([]);
+
+        // Geometría de cristal alrededor del núcleo.
+        ctx.save();
+        ctx.rotate(time * .28 + p.phase);
+        ctx.strokeStyle = NS.rgba('#ffffff', .26);
+        ctx.lineWidth = .9;
+        ctx.beginPath();
+        for (let k = 0; k < 6; k++) {
+          const a = k * TAU / 6;
+          const px = Math.cos(a) * r * 1.34;
+          const py = Math.sin(a) * r * 1.34;
+          if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.strokeStyle = NS.rgba(def.color, .3);
+        for (let k = 0; k < 6; k++) {
+          const a = k * TAU / 6;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * r * .86, Math.sin(a) * r * .86);
+          ctx.lineTo(Math.cos(a) * r * 1.34, Math.sin(a) * r * 1.34);
+          ctx.stroke();
+        }
+        ctx.restore();
         ctx.globalCompositeOperation = 'source-over';
         if (candy) {
           ctx.fillStyle = 'rgba(255,255,255,.16)';
@@ -595,6 +723,24 @@
         ctx.strokeStyle = 'rgba(255,255,255,.45)';
         ctx.lineWidth = 1;
         ctx.stroke();
+        // Reflejo de cristal y brillo superior.
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * (candy ? 1.05 : 1), r * (candy ? .88 : 1), 0, 0, TAU);
+        ctx.clip();
+        const shine = ctx.createLinearGradient(-r, -r, r * .75, r);
+        shine.addColorStop(0, 'rgba(255,255,255,.34)');
+        shine.addColorStop(.38, 'rgba(255,255,255,.04)');
+        shine.addColorStop(.72, 'rgba(255,255,255,0)');
+        shine.addColorStop(1, NS.rgba(def.color, .28));
+        ctx.fillStyle = shine;
+        ctx.fillRect(-r, -r, r * 2, r * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,.7)';
+        ctx.lineWidth = Math.max(1, r * .06);
+        ctx.beginPath();
+        ctx.arc(0, 0, r * .78, Math.PI * 1.05, Math.PI * 1.52);
+        ctx.stroke();
+        ctx.restore();
         ctx.fillStyle = 'rgba(255,255,255,.94)';
         ctx.strokeStyle = 'rgba(23,12,30,.9)';
         ctx.lineWidth = Math.max(1.2, r * .09);
@@ -641,6 +787,21 @@
           ctx.arc(0, 0, r * .07, 0, TAU);
           ctx.fill();
         }
+        // Chispas orbitales.
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        for (let k = 0; k < 3; k++) {
+          const a = time * (1.1 + k * .15) + p.phase + k * TAU / 3;
+          const orbR = r * (1.7 + k * .14);
+          const sx = Math.cos(a) * orbR;
+          const sy = Math.sin(a) * orbR * .72;
+          ctx.globalAlpha = .34 + .28 * Math.sin(time * 3 + k);
+          ctx.fillStyle = k === 1 ? '#ffffff' : def.color;
+          ctx.beginPath();
+          ctx.arc(sx, sy, Math.max(.8, r * .055), 0, TAU);
+          ctx.fill();
+        }
+        ctx.restore();
         ctx.restore();
       }
     }
@@ -780,16 +941,50 @@
 
       if (snake.isLeader) NS.drawCrown(ctx, snake.x, snake.y, radius, time);
 
-      // Escudo
-      if (snake.shieldCharges > 0 || snake.invuln > 0) {
+      // Escudo de emergencia: hexágono dorado con cargas visibles.
+      if (snake.shieldCharges > 0) {
+        const sr = radius * 2.4 + Math.sin(time * 3) * 1.6;
+        ctx.save();
+        ctx.translate(snake.x, snake.y);
+        ctx.rotate(time * .45);
+        ctx.fillStyle = 'rgba(255,207,92,.04)';
+        ctx.strokeStyle = 'rgba(255,207,92,.4)';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        for (let k = 0; k < 6; k++) {
+          const a = k * TAU / 6;
+          const px = Math.cos(a) * sr;
+          const py = Math.sin(a) * sr;
+          if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.rotate(-time * .45);
+        const pipR = radius * 2.6;
+        const charges = Math.min(3, snake.shieldCharges);
+        for (let k = 0; k < charges; k++) {
+          const a = -Math.PI / 2 + (k - (charges - 1) / 2) * .24;
+          ctx.fillStyle = '#ffd76a';
+          ctx.shadowColor = '#ffd76a';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(Math.cos(a) * pipR, Math.sin(a) * pipR, Math.max(1.2, radius * .08), 0, TAU);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // Invulnerabilidad (escudo o potenciador).
+      if (snake.invuln > 0 || powerInvincible) {
         const sr = radius * 2.35 + Math.sin(time * 3) * 2;
         ctx.save();
-        ctx.strokeStyle = snake.invuln > 0 ? NS.rgba(C.accent, .65) : 'rgba(255,207,92,.48)';
+        ctx.strokeStyle = powerInvincible ? 'rgba(255,232,164,.7)' : NS.rgba(C.accent, .65);
         ctx.lineWidth = 1.6;
         ctx.setLineDash([6, 6]);
         ctx.lineDashOffset = time * 24;
         ctx.beginPath(); ctx.arc(snake.x, snake.y, sr, 0, TAU); ctx.stroke();
-        ctx.fillStyle = snake.invuln > 0 ? NS.rgba(C.accent, .06) : 'rgba(255,207,92,.045)';
+        ctx.fillStyle = powerInvincible ? 'rgba(255,207,92,.05)' : NS.rgba(C.accent, .06);
         ctx.beginPath(); ctx.arc(snake.x, snake.y, sr, 0, TAU); ctx.fill();
         ctx.restore();
       }
@@ -898,6 +1093,23 @@
       const w = this.w;
       const h = this.h;
       const flashes = g.save.settings.flashes !== false;
+
+      // Profundidad de la arena: viñeta perimetral cacheada.
+      if (this.game.quality !== 'low') {
+        if (!this.vignetteGrad) {
+          this.vignetteGrad = ctx.createRadialGradient(
+            w / 2, h / 2, Math.min(w, h) * .3,
+            w / 2, h / 2, Math.max(w, h) * .74
+          );
+          this.vignetteGrad.addColorStop(0, 'rgba(0,0,0,0)');
+          this.vignetteGrad.addColorStop(.7, 'rgba(0,0,0,.12)');
+          this.vignetteGrad.addColorStop(1, 'rgba(0,0,0,.42)');
+        }
+        ctx.save();
+        ctx.fillStyle = this.vignetteGrad;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      }
 
       if (g.flash > 0 && flashes) {
         ctx.save();

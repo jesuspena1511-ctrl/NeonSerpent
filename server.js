@@ -57,6 +57,22 @@ const POWERUP_DEFS = {
   zoom: { duration: 20, color: '#56a8ff' }
 };
 const POWERUP_IDS = Object.keys(POWERUP_DEFS);
+const UPGRADE_IDS = ['turbo', 'magnet', 'seed', 'harvest', 'shield'];
+const UPGRADE_MAX = 5;
+
+function parseUpgrades(raw) {
+  const out = { turbo: 0, magnet: 0, seed: 0, harvest: 0, shield: 0 };
+  if (!raw || typeof raw !== 'object') return out;
+  for (const id of UPGRADE_IDS) out[id] = clamp(Math.floor(Number(raw[id]) || 0), 0, UPGRADE_MAX);
+  return out;
+}
+
+function shieldChargesFor(level) {
+  if (level <= 0) return 0;
+  if (level <= 2) return 1;
+  if (level <= 4) return 2;
+  return 3;
+}
 
 /* ============================================================
    REGIONES Y SERVIDORES
@@ -164,6 +180,7 @@ class Room {
     this.events = [];
     this.pendingFoodAdd = [];
     this.pendingFoodDel = [];
+    this.pendingFoodMove = new Map();
     this.time = 0;
     this.tick = 0;
     this.lastTickAt = 0;
@@ -305,9 +322,10 @@ class Room {
       id,
       ws,
       name,
-      skinId: sanitizeId(hello.skinId, 'neon-prime'),
-      outfit: sanitizeId(hello.outfit, 'none'),
-      accessory: sanitizeId(hello.accessory, 'none'),
+      skinId: sanitizeCosmetic(hello.skinId, SKIN_IDS, 'ion'),
+      outfit: sanitizeCosmetic(hello.outfit, OUTFIT_IDS, 'none'),
+      accessory: sanitizeCosmetic(hello.accessory, ACCESSORY_IDS, 'none'),
+      upgrades: parseUpgrades(hello.upgrades),
       input: { a: 0, b: false },
       alive: false,
       kills: 0,
@@ -340,7 +358,8 @@ class Room {
 
   spawnSnake(player) {
     const p = this.findSpawnPoint(420);
-    const snake = new ServerSnake(this, player, p.x, p.y);
+    const startMass = START_MASS + (player.upgrades.seed || 0) * 8;
+    const snake = new ServerSnake(this, player, p.x, p.y, startMass);
     this.snakes.set(player.id, snake);
     player.alive = true;
     return snake;
@@ -455,16 +474,24 @@ class Room {
   }
 
   handleMagnet(snake, dt) {
-    if (this.time >= snake.powerMagnetUntil) return;
-    const range = 360 + snake.radius * 2;
+    const magnetLevel = snake.player.upgrades ? snake.player.upgrades.magnet : 0;
+    const powered = this.time < snake.powerMagnetUntil;
+    const range = 44 + snake.radius * 2.3 + magnetLevel * 22 + (powered ? 360 : 0);
+    if (range <= 0) return;
     const range2 = range * range;
     for (const food of this.foods.values()) {
       const d2 = dist2(snake.x, snake.y, food.x, food.y);
       if (d2 > range2 || d2 < 1) continue;
       const d = Math.sqrt(d2);
-      const pull = Math.min(d, (120 + 480 / Math.max(1, d / 40)) * dt);
-      food.x += (snake.x - food.x) / d * pull;
-      food.y += (snake.y - food.y) / d * pull;
+      const strength = 1 - d / range;
+      const pull = Math.min(d, (130 + 280 * strength) * dt);
+      if (pull < .01) continue;
+      const nx = food.x + (snake.x - food.x) / d * pull;
+      const ny = food.y + (snake.y - food.y) / d * pull;
+      if (Math.abs(nx - food.x) < .005 && Math.abs(ny - food.y) < .005) continue;
+      food.x = nx;
+      food.y = ny;
+      this.pendingFoodMove.set(food.i, { i: food.i, x: +nx.toFixed(2), y: +ny.toFixed(2) });
     }
   }
 
@@ -572,6 +599,28 @@ class Room {
     if (!snake.alive) return false;
     if (snake.invuln > 0 || this.time < snake.powerInvincibleUntil) return false;
     const player = snake.player;
+
+    // Escudo: sobrevive al golpe, se teletransporta y consume una carga.
+    if (snake.shieldCharges > 0) {
+      const oldX = snake.x;
+      const oldY = snake.y;
+      const p = this.findSpawnPoint(520);
+      snake.shieldCharges--;
+      snake.x = p.x;
+      snake.y = p.y;
+      snake.angle = Math.atan2(-p.y, -p.x) + rand(-.4, .4);
+      snake.targetAngle = snake.angle;
+      snake.mass = Math.max(START_MASS, snake.mass * .9);
+      snake.peakMass = Math.max(snake.mass, snake.peakMass * .9);
+      snake.invuln = 2.2;
+      snake.boostDrop = 0;
+      snake.computeDerived();
+      snake.initTrail();
+      snake.updateBody();
+      this.pushEvent({ k: 'shield', pid: player.id, x: +oldX.toFixed(1), y: +oldY.toFixed(1), sh: snake.shieldCharges });
+      return true;
+    }
+
     const rank = snake.rank || 99;
     snake.alive = false;
     this.snakes.delete(snake.id);
@@ -627,6 +676,8 @@ class Room {
       candies,
       kills: snake.kills,
       orbs: snake.orbs,
+      powerups: snake.powerupsUsed,
+      comboBest: snake.comboBest,
       time: snake.timeAlive,
       mass: Math.floor(snake.mass),
       rank,
@@ -668,10 +719,12 @@ class Room {
       powerups: [...this.powerups.values()].map(powerWire),
       fa: this.pendingFoodAdd,
       fd: this.pendingFoodDel,
+      fu: [...this.pendingFoodMove.values()],
       ev: this.events
     };
     this.pendingFoodAdd = [];
     this.pendingFoodDel = [];
+    this.pendingFoodMove.clear();
     this.events = [];
     const text = JSON.stringify(msg);
     for (const player of this.players.values()) {
@@ -687,7 +740,7 @@ class Room {
    SERPIENTE DEL SERVIDOR
    ============================================================ */
 class ServerSnake {
-  constructor(room, player, x, y) {
+  constructor(room, player, x, y, startMass) {
     this.room = room;
     this.player = player;
     this.id = player.id;
@@ -701,7 +754,7 @@ class ServerSnake {
     this.prevY = y;
     this.angle = Math.atan2(-y, -x) + rand(-.4, .4);
     this.targetAngle = this.angle;
-    this.mass = START_MASS;
+    this.mass = Math.max(START_MASS, Number(startMass) || START_MASS);
     this.peakMass = this.mass;
     this.alive = true;
     this.boosting = false;
@@ -715,7 +768,7 @@ class ServerSnake {
     this.powerMagnetUntil = -1;
     this.powerZoomUntil = -1;
     this.powerupsUsed = 0;
-    this.shieldCharges = 0;
+    this.shieldCharges = shieldChargesFor(player.upgrades ? player.upgrades.shield : 0);
     this.timeAlive = 0;
     this.rank = 99;
     this.isLeader = false;
@@ -808,7 +861,8 @@ class ServerSnake {
     let speed = BASE_SPEED;
     if (this.boosting) {
       if (!invincible) {
-        const drain = BOOST_DRAIN * .94 * dt;
+        const turbo = this.player.upgrades ? this.player.upgrades.turbo : 0;
+        const drain = BOOST_DRAIN * (1 - turbo * .09) * dt;
         this.mass = Math.max(BOOST_MIN_MASS, this.mass - drain);
         if (this.mass <= BOOST_MIN_MASS + .5) this.boosting = false;
         this.boostDrop += drain * .68;
@@ -854,6 +908,8 @@ class ServerSnake {
     let gain = food.v;
     if (this.room.time - this.lastEatTime <= COMBO_WINDOW) this.combo = Math.min(30, this.combo + 1);
     else this.combo = 1;
+    const harvest = this.player.upgrades ? this.player.upgrades.harvest : 0;
+    gain *= 1 + harvest * .07;
     gain *= 1 + Math.min(this.combo, 30) * .01;
     this.mass = Math.min(MAX_MASS, this.mass + gain);
     this.peakMass = Math.max(this.peakMass, this.mass);
@@ -877,6 +933,7 @@ class ServerSnake {
       b: this.boosting ? 1 : 0,
       al: 1,
       k: this.kills,
+      ob: this.orbs,
       r: this.rank,
       pi: +this.powerInvincibleUntil.toFixed(2),
       pm: +this.powerMagnetUntil.toFixed(2),
@@ -885,7 +942,9 @@ class ServerSnake {
       inv: +Math.max(0, this.invuln).toFixed(2),
       ta: +this.timeAlive.toFixed(1),
       pk: +this.peakMass.toFixed(2),
-      cm: this.combo
+      cm: this.combo,
+      pu: this.powerupsUsed,
+      cb: this.comboBest
     };
   }
 }
@@ -922,6 +981,18 @@ function sanitizeName(name, fallback) {
 function sanitizeId(value, fallback) {
   const text = String(value || '').toLowerCase();
   return /^[a-z0-9_-]{1,42}$/.test(text) ? text : fallback;
+}
+
+const SKIN_IDS = new Set([
+  'ion', 'magma', 'venom', 'nova', 'glacier', 'aurum', 'phantom', 'sakura',
+  'void', 'prism', 'pumpkin', 'ghost', 'witch'
+]);
+const OUTFIT_IDS = new Set(['none', 'scarf', 'armor', 'tux', 'holo', 'pumpkin', 'spirit', 'vampire']);
+const ACCESSORY_IDS = new Set(['none', 'shades', 'headphones', 'tophat', 'halo', 'crown', 'bat', 'witchhat', 'bones']);
+
+function sanitizeCosmetic(value, valid, fallback) {
+  const id = sanitizeId(value, fallback);
+  return valid.has(id) ? id : fallback;
 }
 
 function colorForSkin(skinId) {
@@ -1046,7 +1117,9 @@ function serveStatic(req, res, pathname) {
     const headers = {
       'Content-Type': type,
       'Content-Length': stat.size,
-      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600',
+      'Cache-Control': ['.html', '.js', '.css', '.json'].includes(ext)
+        ? 'no-cache, no-store, must-revalidate'
+        : 'public, max-age=3600',
       'X-Content-Type-Options': 'nosniff'
     };
     if (ext === '.json') headers['Access-Control-Allow-Origin'] = '*';

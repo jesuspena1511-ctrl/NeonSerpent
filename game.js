@@ -832,6 +832,8 @@
       this.save.stats.kills += data.kills || 0;
       this.save.stats.time += data.time || 0;
       this.save.stats.orbs += data.orbs || 0;
+      this.save.stats.powerups += data.powerups || 0;
+      this.save.stats.bestCombo = Math.max(this.save.stats.bestCombo || 0, data.comboBest || 0);
       this.save.stats.bestMass = Math.max(this.save.stats.bestMass || 0, data.mass || 0);
       if (data.rank === 1) this.save.stats.wins++;
       const unlocked = this.checkAchievements(false);
@@ -846,7 +848,7 @@
         reward,
         totalCurrency: event ? this.save.candy : this.save.coins,
         variant: event ? 'halloween' : 'classic',
-        comboBest: 0,
+        comboBest: data.comboBest || 0,
         unlocked: unlocked.length,
         online: true,
         room: this.online && this.online.room ? this.online.room.name : 'Online'

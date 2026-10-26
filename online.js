@@ -74,7 +74,7 @@
       this.isPlayer = !!isPlayer;
       this.id = wire.i;
       this.name = wire.n || 'Jugador#1';
-      this.skinId = wire.sk || 'neon-prime';
+      this.skinId = SKIN_MAP[wire.sk] ? wire.sk : 'ion';
       this.skin = SKIN_MAP[this.skinId] || SKINS[0];
       this.outfit = OUTFIT_MAP[wire.o] ? wire.o : 'none';
       this.accessory = ACCESSORY_MAP[wire.ac] ? wire.ac : 'none';
@@ -86,7 +86,7 @@
       this.alive = !!wire.al;
       this.boosting = !!wire.b;
       this.kills = wire.k || 0;
-      this.orbs = 0;
+      this.orbs = wire.ob || 0;
       this.rank = wire.r || 99;
       this.isLeader = false;
       this.invuln = wire.inv || 0;
@@ -94,10 +94,10 @@
       this.powerInvincibleUntil = wire.pi || -1;
       this.powerMagnetUntil = wire.pm || -1;
       this.powerZoomUntil = wire.pz || -1;
-      this.powerupsUsed = 0;
+      this.powerupsUsed = wire.pu || 0;
       this.timeAlive = wire.ta || 0;
       this.combo = wire.cm || 0;
-      this.comboBest = this.combo;
+      this.comboBest = wire.cb || this.combo;
       this.lastEatTime = game.time;
       this.spawnFlash = 0;
       this.trail = [];
@@ -206,6 +206,7 @@
       this.alive = !!wire.al;
       this.boosting = !!wire.b;
       this.kills = wire.k || 0;
+      this.orbs = wire.ob || 0;
       this.rank = wire.r || 99;
       this.invuln = wire.inv || 0;
       this.shieldCharges = wire.sh || 0;
@@ -214,6 +215,8 @@
       this.powerZoomUntil = wire.pz || -1;
       this.timeAlive = wire.ta || 0;
       this.combo = wire.cm || 0;
+      this.powerupsUsed = wire.pu || 0;
+      this.comboBest = wire.cb || 0;
       if (this.combo > 0) this.lastEatTime = this.game.time;
       this.computeDerived();
       if (force || !this.initialized) {
@@ -233,7 +236,8 @@
       let speed = BASE_SPEED;
       if (this.boosting) {
         if (!invincible) {
-          this.mass = Math.max(BOOST_MIN_MASS, this.mass - BOOST_DRAIN * .94 * dt);
+          const turbo = this.isPlayer ? (this.game.upgradeLevel('turbo') || 0) : 0;
+          this.mass = Math.max(BOOST_MIN_MASS, this.mass - BOOST_DRAIN * (1 - turbo * .09) * dt);
           if (this.mass <= BOOST_MIN_MASS + .5) this.boosting = false;
         }
         speed = BOOST_SPEED * (invincible ? 1.05 : 1);
@@ -475,6 +479,13 @@
       for (const id of msg.fd || []) {
         if (this.foodMap.delete(id)) this.foodDirty = true;
       }
+      for (const moved of msg.fu || []) {
+        const food = this.foodMap.get(moved.i);
+        if (!food) continue;
+        food.x = moved.x;
+        food.y = moved.y;
+        this.foodDirty = true;
+      }
       this.refreshFoodList();
       if (msg.powerups) {
         this.powerList = msg.powerups.map((p) => this.makePower(p));
@@ -514,6 +525,20 @@
           const accent = ev.p === 'magnet' ? 'pink' : ev.p === 'jackpot' ? 'lime' : ev.p === 'zoom' ? 'cyan' : 'gold';
           game.ui.toast(game.variant === 'halloween' ? def.candyName : def.name, def.desc, accent, def.icon);
         }
+      } else if (ev.k === 'shield') {
+        if (ev.pid !== this.playerId) return;
+        const x = ev.x || game.player?.x || 0;
+        const y = ev.y || game.player?.y || 0;
+        window.gameAudio.play('shield');
+        game.camera.shake(8);
+        game.particles.emitBurst(x, y, '#ffd76a', 30, 280, 5, .9);
+        game.particles.ring(x, y, '#ffd76a', (game.player?.radius || 12) * 3, .7);
+        game.ui.toast(
+          'ESCUDO ACTIVADO',
+          ev.sh > 0 ? 'Sobrevives al impacto. Te quedan ' + ev.sh + ' cargas.' : 'Era tu última carga. ¡Escapa y recupera masa!',
+          'gold',
+          'i-shield'
+        );
       } else if (ev.k === 'join') {
         if (ev.pid !== this.playerId) {
           this.room.players = Math.min(this.room.capacity || 16, (this.room.players || 1) + 1);
@@ -855,6 +880,15 @@
       }).finally(() => {
         this.loading = false;
         this.loadPromise = null;
+        // render() se ejecuta antes del finally; actualizamos el estado final aquí
+        // para que no quede "Buscando servidores..." tras una carga correcta.
+        if (this.isBrowserOpen()) {
+          if (this.error) this.setStatus(this.error);
+          else if (this.regions.length) {
+            const playerWord = this.totalPlayers === 1 ? ' jugador' : ' jugadores';
+            this.setStatus(this.regions.length + ' servidores visibles · ' + this.totalPlayers + playerWord + ' en línea');
+          }
+        }
       });
       return this.loadPromise;
     }
@@ -1101,9 +1135,10 @@
         ws.send(JSON.stringify({
           t: 'join',
           name: save.name || 'Jugador#1',
-          skinId: save.skin || 'neon-prime',
+          skinId: save.skin || 'ion',
           outfit: save.outfit || 'none',
           accessory: save.accessory || 'none',
+          upgrades: save.upgrades || {},
           roomId: room.id,
           regionId: room.regionId || region.id,
           variant: room.variant || 'classic',

@@ -1550,12 +1550,13 @@
         const remaining = (player[field] || -1) - now;
         if (def && remaining > 0) active.push({ def, remaining });
       }
-      const signature = active.map((a) => a.def.id + ':' + Math.ceil(a.remaining * 10)).join('|');
+      const shields = clamp(Math.floor(player.shieldCharges || 0), 0, 3);
+      const signature = active.map((a) => a.def.id + ':' + Math.ceil(a.remaining * 10)).join('|') + '|shield:' + shields;
       if (signature === this.powerSignature) return;
       this.powerSignature = signature;
 
       hud.textContent = '';
-      if (!active.length) {
+      if (!active.length && !shields) {
         hud.classList.add('hidden');
         return;
       }
@@ -1584,6 +1585,34 @@
         copy.appendChild(name);
         copy.appendChild(time);
         copy.appendChild(bar);
+        chip.appendChild(ico);
+        chip.appendChild(copy);
+        hud.appendChild(chip);
+      }
+
+      if (shields > 0) {
+        const chip = document.createElement('div');
+        chip.className = 'power-chip power-shield';
+        chip.title = 'Escudo de emergencia: sobrevives a un impacto y teletransportas.';
+        const ico = document.createElement('span');
+        ico.className = 'power-chip-ico';
+        ico.appendChild(makeIcon('i-shield'));
+        const copy = document.createElement('span');
+        copy.className = 'power-chip-copy';
+        const name = document.createElement('b');
+        name.textContent = 'ESCUDO';
+        const count = document.createElement('small');
+        count.textContent = 'x' + shields + (shields === 1 ? ' CARGA' : ' CARGAS');
+        const pips = document.createElement('span');
+        pips.className = 'shield-pips';
+        for (let i = 0; i < 3; i++) {
+          const pip = document.createElement('i');
+          if (i < shields) pip.className = 'on';
+          pips.appendChild(pip);
+        }
+        copy.appendChild(name);
+        copy.appendChild(count);
+        copy.appendChild(pips);
         chip.appendChild(ico);
         chip.appendChild(copy);
         hud.appendChild(chip);
