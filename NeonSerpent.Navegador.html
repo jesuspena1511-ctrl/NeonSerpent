@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#04070f">
+<meta name="description" content="Neon Serpent — arena de serpientes neón contra bots, con aspecto y ropa personalizables, logros, potenciadores, tienda de Halloween y controles adaptables.">
+<title>NEON SERPENT · Arena</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23050a14'/%3E%3Cpath d='M18 46c0-8 6-10 14-10s14-2 14-10-6-10-14-10' stroke='%2322f5e2' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='43' cy='44' r='4' fill='%23ff2fb3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" class="svg-sprite" aria-hidden="true">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10.1-6.8c.6-.4.6-1.2 0-1.6L9.6 4.4C8.9 3.9 8 4.4 8 5.2Z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.4" y="5" width="3.8" height="14" rx="1.2" fill="currentColor"/><rect x="13.8" y="5" width="3.8" height="14" rx="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="5.2" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".55"/><path d="M12 7.4v9.2M9.8 9.2h3.1a1.8 1.8 0 0 1 0 3.6h-1.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v4.4a4 4 0 0 1-8 0V4Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 5H5.3c0 3.2 1.2 4.8 3.4 5.2M16 5h2.7c0 3.2-1.2 4.8-3.4 5.2M12 12.4V16M8.6 20h6.8M10 16h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.4L12 5.6v12.8L7.4 14.5H4v-5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-muted" viewBox="0 0 24 24"><path d="M4 9.5h3.4L12 5.6v12.8L7.4 14.5H4v-5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m15.5 9 5 5M20.5 9l-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-shop" viewBox="0 0 24 24"><path d="M5 8.5h14l-1 11H6l-1-11Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 9V6.7a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-skin" viewBox="0 0 24 24"><path d="M5 16.5C5 11 9.4 9 12 9s7-2 7-6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="7.4" cy="17.6" r="2.2" fill="currentColor"/><circle cx="17.4" cy="17.6" r="1.5" fill="currentColor" opacity=".55"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.7 2.2c-.9.5-1.3 1-1.3 2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 8.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m19 13.4 1.3 1-.4 2.2-1.6.4-1 1.2.1 1.7-2 1-1.2-1.1-1.2.3-.9 1.4h-2.2l-.9-1.4-1.2-.3-1.2 1.1-2-1 .1-1.7-1-1.2-1.6-.4-.4-2.2 1.3-1v-1.5l-1.3-1 .4-2.2 1.6-.4 1-1.2L5 5.7l2-1 1.2 1.1 1.2-.3.9-1.4h2.2l.9 1.4 1.2.3L15.8 4.7l2 1-.1 1.7 1 1.2 1.6.4.4 2.2-1.3 1v1.4Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" opacity=".8"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m4 10 8-6.5 8 6.5v9H4v-9Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 19v-5h5v5" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 24 24"><path d="M19.2 12a7.2 7.2 0 1 1-2.4-5.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M19.6 4.5v4.6h-4.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="8.8" cy="8.8" r="1.15" fill="currentColor"/><circle cx="15.2" cy="8.8" r="1.15" fill="currentColor"/><circle cx="12" cy="12" r="1.15" fill="currentColor"/><circle cx="8.8" cy="15.2" r="1.15" fill="currentColor"/><circle cx="15.2" cy="15.2" r="1.15" fill="currentColor"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="m4 8 4 3.2 4-6 4 6L20 8l-1.6 10H5.6L4 8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5.8 21h12.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7.8a4 4 0 0 1 8 0V10" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="15" r="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 6.7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-fullscreen" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.2 2.5 5.5 13.4h5.1L9.8 21.5l8-11.1h-5.2l.6-7.9Z" fill="currentColor"/></symbol>
+    <symbol id="i-magnet" viewBox="0 0 24 24"><path d="M5 4v8a7 7 0 0 0 14 0V4h-4v8a3 3 0 0 1-6 0V4H5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5 7.5h4M15 7.5h4" stroke="currentColor" stroke-width="2.4"/></symbol>
+    <symbol id="i-seed" viewBox="0 0 24 24"><path d="M12 21V11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 11C12 6 8 4 4 4c0 5 3 7 8 7Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 14c0-4 3.4-5.5 7.2-5.5 0 4-2.8 5.5-7.2 5.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-gem" viewBox="0 0 24 24"><path d="m12 3 7 6-7 12L5 9l7-6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5 9h14M12 3l-2.5 6L12 21l2.5-12L12 3Z" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.8 19 6v6c0 4.4-3 7.6-7 9.2-4-1.6-7-4.8-7-9.2V6l7-3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m8.8 12 2.2 2.2 4.4-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-speed" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2M21 12a9 9 0 0 1-9 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m12 12 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4.5" y="8" width="15" height="11" rx="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16.6h6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="3.4" r="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 19c0-3 2.4-5.2 5.5-5.2s5.5 2.2 5.5 5.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M15.6 6.1a3 3 0 0 1 0 5.7M17 13.9c2.1.4 3.5 2.1 3.5 4.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-gamepad" viewBox="0 0 24 24"><path d="M7.4 7.5h9.2c2.7 0 4.4 4.3 3.7 8-.4 2.2-2.7 2.5-4.1.8l-1.4-1.7H9.2l-1.4 1.7c-1.4 1.7-3.7 1.4-4.1-.8-.7-3.7 1-8 3.7-8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 10v3M6.5 11.5h3M15.4 10.8h.01M17.6 12.4h.01" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2.8" y="7" width="18.4" height="10" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6 10h.01M9 10h.01M12 10h.01M15 10h.01M18 10h.01M6 13h.01M18 13h.01M8 16h8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-stick" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="14.4" cy="9.8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.4v2M12 18.6v2M3.4 12h2M18.6 12h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-accessibility" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2" fill="currentColor"/><path d="M4.5 8.5h15M12 8.5v5M12 13.5l-4 7M12 13.5l4 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1" opacity=".55"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" opacity=".25"/></symbol>
+    <symbol id="i-caption" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 10.2a2.3 2.3 0 1 0 0 3.6M15.5 10.2a2.3 2.3 0 1 0 0 3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2.6c.5 5.4 3 7.9 8.4 8.4-5.4.5-7.9 3-8.4 8.4-.5-5.4-3-7.9-8.4-8.4 5.4-.5 7.9-3 8.4-8.4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-candy" viewBox="0 0 24 24"><path d="M8.2 9.2h7.6l1.2 2.8-1.2 2.8H8.2L7 12l1.2-2.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m8.1 9.4-4.6-2 1.1 3.2-1.1 3.2 4.6-2.1m7.8 0 4.6 2.1-1.1-3.2 1.1-3.2-4.6 2.1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 9.3v5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".6"/></symbol>
+    <symbol id="i-pumpkin" viewBox="0 0 24 24"><path d="M12 5.4c-3.7 0-6.6 3-6.6 6.7 0 3.8 2.9 6.6 6.6 6.6s6.6-2.8 6.6-6.6c0-3.7-2.9-6.7-6.6-6.7Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 5.6c-2.1-2-4.1-2.3-5.6-1.4M12 5.6c2.1-2 4.1-2.3 5.6-1.4M12 5.4V3.5m-.8-1.1h1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="m8.7 11.4 1.7 1.8 1.6-1.5 1.6 1.5 1.7-1.8M9.2 16.7l2-1.1 1.1 1.2 1.1-1.2 2 1.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-ghost" viewBox="0 0 24 24"><path d="M6.2 18V10a5.8 5.8 0 0 1 11.6 0v8l-2.3-1.4-1.9 1.5-1.8-1.5-1.8 1.5-1.9-1.5L6.2 18Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="9.6" cy="10.4" r="1" fill="currentColor"/><circle cx="14.4" cy="10.4" r="1" fill="currentColor"/><path d="M10.5 14.2c.9.6 2.1.6 3 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-witch" viewBox="0 0 24 24"><path d="m12 2.8-3 9.3h6L12 2.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5.4 12.1h13.2M8 12.1c.5 2.4 1.8 3.8 4 3.8s3.5-1.4 4-3.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="13.8" r="1.1" fill="currentColor"/><path d="m6 18 1.3 3M18 18l-1.3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".65"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.8 12s3.4-5.5 9.2-5.5S21.2 12 21.2 12s-3.4 5.5-9.2 5.5S2.8 12 2.8 12Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/></symbol>
+    <symbol id="i-achievement" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m8.7 13.6-1.5 7 4.8-2.4 4.8 2.4-1.5-7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.8 9 1.4 1.4 3-3.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-outfit" viewBox="0 0 24 24"><path d="m8.4 4-4.1 2.8 2 4.1 2.1-1.1V20h7.2V9.8l2.1 1.1 2-4.1L15.6 4l-1.8 2h-3.6L8.4 4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10.2 6c.5 1.2 1.1 1.8 1.8 1.8s1.3-.6 1.8-1.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-accessory" viewBox="0 0 24 24"><path d="M2.8 10.5h8.4v4.2a4.2 4.2 0 0 1-8.4 0v-4.2Zm10 0h8.4v4.2a4.2 4.2 0 0 1-8.4 0v-4.2Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11.2 11.2h1.6M2.8 11.2l-1.3-1M21.2 11.2l1.3-1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 15.2A8.5 8.5 0 0 1 8.8 4a8.6 8.6 0 1 0 11.2 11.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m17 4 .5 1.5L19 6l-1.5.5L17 8l-.5-1.5L15 6l1.5-.5L17 4Z" fill="currentColor" opacity=".7"/></symbol>
+  </defs>
+</svg>
+
+<div id="app">
+  <canvas id="game" aria-label="Arena de juego Neon Serpent"></canvas>
+  <div class="fx fx-scan" aria-hidden="true"></div>
+  <div class="fx fx-vignette" aria-hidden="true"></div>
+  <div class="fx fx-grain" aria-hidden="true"></div>
+
+  <!-- ===================== BOOT ===================== -->
+  <div id="boot" class="boot">
+    <div class="boot-logo">
+      <svg viewBox="0 0 64 64" class="logo-mark" aria-hidden="true">
+        <defs>
+          <linearGradient id="bootGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#22f5e2"/><stop offset=".55" stop-color="#56a8ff"/><stop offset="1" stop-color="#ff2fb3"/>
+          </linearGradient>
+        </defs>
+        <path d="M17 48c0-9 7-11 15-11s15-2 15-11-7-11-15-11" fill="none" stroke="url(#bootGrad)" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="44" cy="45" r="3.6" fill="#ff2fb3"/>
+      </svg>
+      <div class="boot-name">NEON<span>SERPENT</span></div>
+    </div>
+    <div class="boot-track"><i id="bootBar"></i></div>
+    <div class="boot-label">INICIANDO NÚCLEO DE LA ARENA</div>
+  </div>
+
+  <!-- ===================== MENU ===================== -->
+  <div id="menu" class="screen menu hidden">
+    <div class="menu-shade" aria-hidden="true"></div>
+
+    <header class="menu-top">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" class="brand-mark" aria-hidden="true">
+          <path d="M17 48c0-9 7-11 15-11s15-2 15-11-7-11-15-11" fill="none" stroke="url(#bootGrad)" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="44" cy="45" r="3.6" fill="#ff2fb3"/>
+        </svg>
+        <div class="brand-text">
+          <b>NEON SERPENT</b>
+          <span>ARENA SECTOR 07</span>
+        </div>
+      </div>
+      <div class="menu-top-right">
+        <button id="btnMuteMenu" class="icon-btn" aria-label="Silenciar sonido" title="Sonido (M)">
+          <svg class="icon i-sound"><use href="#i-sound"/></svg>
+          <svg class="icon i-muted"><use href="#i-muted"/></svg>
+        </button>
+        <div class="pill coin-pill" title="Monedas">
+          <svg class="icon"><use href="#i-coin"/></svg>
+          <b id="menuCoins">0</b>
+        </div>
+        <div class="pill candy-pill" title="Dulces de Halloween">
+          <svg class="icon"><use href="#i-candy"/></svg>
+          <b id="menuCandy">0</b>
+        </div>
+        <div class="pill best-pill" title="Mejor puntaje">
+          <svg class="icon"><use href="#i-crown"/></svg>
+          <span>RÉCORD</span>
+          <b id="menuBest">0</b>
+        </div>
+        <button id="btnFullscreen" class="icon-btn" aria-label="Pantalla completa" title="Pantalla completa">
+          <svg class="icon"><use href="#i-fullscreen"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="menu-hero">
+      <section class="hero-copy">
+        <div class="eyebrow"><span class="live-dot"></span> <span id="menuModeLabel">ARENA DE BOTS</span> · <b id="menuAlive">15</b> <span id="menuAliveLabel">RIVALES</span></div>
+        <h1 class="hero-title" aria-label="Neon Serpent">
+          <span class="title-line line-1" data-text="NEON">NEON</span>
+          <span class="title-line line-2" data-text="SERPENT">SERPENT</span>
+        </h1>
+        <p class="hero-sub">Crece. Rodea. Devora.<br><b>Solo uno domina la arena.</b></p>
+
+        <div class="mode-dock">
+          <div class="mode-picker" role="group" aria-label="Modo de juego">
+            <button class="mode-choice active" data-mode="bots" aria-pressed="true">
+              <svg class="icon"><use href="#i-bot"/></svg>
+              <span><b>BOTS</b><small>IA local</small></span>
+            </button>
+            <button class="mode-choice" data-mode="online" aria-pressed="false">
+              <svg class="icon"><use href="#i-users"/></svg>
+              <span><b>MULTIJUGADOR</b><small>Servidores en vivo</small></span>
+              <em>ONLINE</em>
+            </button>
+          </div>
+          <div id="difficultyRow" class="difficulty-row" role="group" aria-label="Dificultad de los bots">
+            <span class="diff-label">DIFICULTAD</span>
+            <div class="diff-seg">
+              <button data-difficulty="easy">FÁCIL</button>
+              <button data-difficulty="normal" class="active">NORMAL</button>
+              <button data-difficulty="hard">DIFÍCIL</button>
+            </div>
+          </div>
+          <p id="onlineNote" class="online-note hidden"><span class="live-dot"></span> <span id="onlineNoteText">Conectando con la red de servidores...</span> <button id="btnServers" class="online-servers-btn" type="button">VER SERVIDORES <svg class="icon"><use href="#i-arrow"/></svg></button></p>
+        </div>
+
+        <div class="alias-row">
+          <label class="alias-field">
+            <span class="alias-label">TU ALIAS</span>
+            <input id="playerName" type="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Jugador#1" aria-label="Tu alias">
+            <button id="btnRandomName" class="alias-dice" type="button" title="Nombre aleatorio" aria-label="Nombre aleatorio">
+              <svg class="icon"><use href="#i-dice"/></svg>
+            </button>
+          </label>
+        </div>
+
+        <div class="hero-actions">
+          <button id="btnPlay" class="btn btn-primary btn-hero">
+            <span class="btn-shine"></span>
+            <svg class="icon play-ico"><use href="#i-play"/></svg>
+            <span class="btn-text">ENTRAR A LA ARENA</span>
+            <span class="keycap">ENTER</span>
+          </button>
+          <button id="btnHangar" class="btn btn-ghost">
+            <svg class="icon"><use href="#i-shop"/></svg>
+            HANGAR
+          </button>
+        </div>
+
+        <button id="btnHalloween" class="event-banner" type="button">
+          <span class="event-banner-glow" aria-hidden="true"></span>
+          <span class="event-banner-icon"><svg class="icon"><use href="#i-pumpkin"/></svg></span>
+          <span class="event-banner-copy">
+            <small>EVENTO LIMITADO · DULCES Y TERROR</small>
+            <b>NOCHE DE HALLOWEEN</b>
+            <em>Orbes de caramelo, potenciadores gigantes y recompensas dulces.</em>
+          </span>
+          <span class="event-banner-cta">ENTRAR <svg class="icon"><use href="#i-arrow"/></svg></span>
+        </button>
+
+        <div class="hero-meta">
+          <div class="meta-item"><b id="menuRuns">0</b><span>PARTIDAS</span></div>
+          <div class="meta-sep"></div>
+          <div class="meta-item"><b id="menuKills">0</b><span>BAJAS</span></div>
+          <div class="meta-sep"></div>
+          <div class="meta-item"><b id="menuTime">0m</b><span>EN ARENA</span></div>
+          <div class="meta-sep"></div>
+          <div class="meta-item"><b id="menuRank">NOVATO</b><span>RANGO</span></div>
+        </div>
+      </section>
+
+      <aside class="hero-side">
+        <div class="operator-card">
+          <div class="op-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <div class="op-head">
+            <span>OPERADOR ACTIVO</span>
+            <span id="opRank" class="op-rank">NOVATO</span>
+          </div>
+          <div class="op-preview">
+            <canvas id="menuSkin" width="560" height="300" aria-hidden="true"></canvas>
+            <div class="op-scan" aria-hidden="true"></div>
+          </div>
+          <div class="op-id">
+            <div>
+              <b id="opName">Jugador#1</b>
+              <span id="opSkinName">NEÓN PRIME</span>
+            </div>
+            <button id="btnSkins" class="mini-btn" aria-label="Cambiar aspecto">
+              <svg class="icon"><use href="#i-skin"/></svg>
+            </button>
+          </div>
+          <div class="op-stats">
+            <div><span>MEJOR</span><b id="opBest">0</b></div>
+            <div><span>BAJAS</span><b id="opKills">0</b></div>
+            <div><span>MONEDAS</span><b id="opCoins">0</b></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <nav class="menu-nav" aria-label="Menú principal">
+      <button class="nav-link" data-panel="hangar">
+        <svg class="icon"><use href="#i-shop"/></svg><span>HANGAR</span>
+      </button>
+      <button class="nav-link" data-panel="skins">
+        <svg class="icon"><use href="#i-skin"/></svg><span>ASPECTOS</span>
+      </button>
+      <button class="nav-link" data-panel="achievements">
+        <svg class="icon"><use href="#i-achievement"/></svg><span>LOGROS</span>
+      </button>
+      <button class="nav-link" data-panel="settings">
+        <svg class="icon"><use href="#i-settings"/></svg><span>AJUSTES</span>
+      </button>
+      <button class="nav-link" data-panel="help">
+        <svg class="icon"><use href="#i-help"/></svg><span>CÓMO JUGAR</span>
+      </button>
+      <span class="build-tag">BUILD 1.0.0 · LOCAL</span>
+    </nav>
+
+    <div class="menu-tip">
+      <span class="tip-glyph">!</span>
+      <span id="menuTip">Consejo: rodea a una serpiente más pequeña y espera a que choque contigo.</span>
+    </div>
+  </div>
+
+  <!-- ===================== HUD ===================== -->
+  <div id="hud" class="hud hidden">
+    <header class="hud-top">
+      <div class="hud-player">
+        <div class="hp-preview"><canvas id="hudSkin" width="96" height="96"></canvas><span class="hp-live"></span></div>
+        <div class="hp-body">
+          <div class="hp-main">
+            <span class="hp-label">MASA</span>
+            <strong id="hudScore">0</strong>
+            <span id="hudRank" class="hp-rank">#—</span>
+          </div>
+          <div class="hp-sub"><span id="hudName">Jugador#1</span><i></i><span id="hudTime">0:00</span><i></i><span id="hudMode" class="hud-mode">BOTS · NORMAL</span></div>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div id="combo" class="combo hidden">
+          <div class="combo-top"><span>COMBO</span><b id="comboVal">x2</b></div>
+          <div class="combo-track"><i id="comboBar"></i></div>
+        </div>
+        <div id="killfeed" class="killfeed" aria-live="polite"></div>
+      </div>
+
+      <div class="hud-right">
+        <div class="hud-actions">
+          <button id="btnMuteHud" class="icon-btn hud-icon" aria-label="Silenciar sonido">
+            <svg class="icon i-sound"><use href="#i-sound"/></svg>
+            <svg class="icon i-muted"><use href="#i-muted"/></svg>
+          </button>
+          <button id="btnPause" class="icon-btn hud-icon" aria-label="Pausa">
+            <svg class="icon"><use href="#i-pause"/></svg>
+          </button>
+        </div>
+        <div class="leaderboard">
+          <div class="lb-head"><span><i class="live-dot"></i>CLASIFICACIÓN</span><b id="lbCount">15</b></div>
+          <ol id="leaderboard" class="lb-list"></ol>
+        </div>
+      </div>
+    </header>
+
+    <div class="hud-bottom">
+      <div id="powerHud" class="power-hud" aria-live="polite"></div>
+      <div class="boost-wrap">
+        <div class="boost-label"><span>TURBO</span><em id="boostHint">MANTÉN CLIC / ESPACIO</em></div>
+        <div class="boost-track">
+          <i id="boostFill"></i>
+          <div class="boost-ticks" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="boost-caption"><span id="boostState">LISTO</span><span id="massLabel">MASA 0</span></div>
+      </div>
+
+      <div class="minimap">
+        <canvas id="minimap" width="200" height="200" aria-label="Minimapa"></canvas>
+        <span class="mm-label">SECTOR 07</span>
+        <span class="mm-ring" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <div id="mobileBoost" class="mobile-boost" aria-label="Turbo">
+      <svg class="icon"><use href="#i-bolt"/></svg><span>TURBO</span>
+    </div>
+
+    <div id="touchStick" class="touch-stick" aria-hidden="true">
+      <div class="stick-base"><i id="stickKnob"></i></div>
+      <span>MOVER</span>
+    </div>
+
+    <div id="dpad" class="dpad" aria-label="Dirección">
+      <button class="dpad-btn up" data-dir="up" aria-label="Arriba">▲</button>
+      <button class="dpad-btn left" data-dir="left" aria-label="Izquierda">◀</button>
+      <button class="dpad-btn right" data-dir="right" aria-label="Derecha">▶</button>
+      <button class="dpad-btn down" data-dir="down" aria-label="Abajo">▼</button>
+    </div>
+
+    <div id="captionLayer" class="caption-layer hidden" aria-live="polite">
+      <svg class="icon"><use href="#i-caption"/></svg>
+      <span id="captionText"></span>
+    </div>
+
+    <div id="edgeWarning" class="edge-warning">
+      <svg class="icon"><use href="#i-close"/></svg>
+      <span>MURO DE CONTENCIÓN</span>
+    </div>
+
+    <div id="toastLayer" class="toast-layer" aria-live="polite"></div>
+
+    <div id="countdown" class="countdown hidden">
+      <div class="cd-label">PREPÁRATE</div>
+      <span id="countdownText">3</span>
+      <div class="cd-ring" aria-hidden="true"></div>
+    </div>
+
+    <div class="hud-hint">
+      <span class="keycap">ESC</span> PAUSA
+      <span class="dot"></span>
+      <span class="keycap">M</span> SONIDO
+    </div>
+  </div>
+
+  <!-- ===================== PANELS ===================== -->
+  <div id="panelLayer" class="panel-layer hidden">
+    <div class="panel-backdrop" data-close="1"></div>
+
+    <section id="panel-hangar" class="panel hidden" role="dialog" aria-modal="true" aria-labelledby="hangarTitle">
+      <header class="panel-head">
+        <div>
+          <span class="panel-kicker">LABORATORIO</span>
+          <h2 id="hangarTitle">HANGAR</h2>
+        </div>
+        <div class="panel-head-right">
+          <div class="pill coin-pill"><svg class="icon"><use href="#i-coin"/></svg><b id="hangarCoins">0</b></div>
+          <div class="pill candy-pill"><svg class="icon"><use href="#i-candy"/></svg><b id="hangarCandy">0</b></div>
+          <button class="icon-btn panel-close" data-close="1" aria-label="Cerrar"><svg class="icon"><use href="#i-close"/></svg></button>
+        </div>
+      </header>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="upgrades" role="tab" aria-selected="true">MEJORAS</button>
+        <button class="tab" data-tab="skins" role="tab" aria-selected="false">ASPECTOS</button>
+      </div>
+      <div class="panel-scroll">
+        <div id="upgradesList" class="upgrade-grid"></div>
+        <div id="cosmeticTabs" class="cosmetic-tabs hidden" role="tablist" aria-label="Categorías de aspecto">
+          <button class="active" data-cosmetic-type="skin" role="tab" aria-selected="true"><svg class="icon"><use href="#i-skin"/></svg>PIELES</button>
+          <button data-cosmetic-type="outfit" role="tab" aria-selected="false"><svg class="icon"><use href="#i-outfit"/></svg>ROPA</button>
+          <button data-cosmetic-type="accessory" role="tab" aria-selected="false"><svg class="icon"><use href="#i-accessory"/></svg>ACCESORIOS</button>
+        </div>
+        <div id="skinsList" class="skin-grid hidden"></div>
+      </div>
+      <footer class="panel-foot">
+        <p><b>CONSEJO:</b> las mejoras y los aspectos son permanentes. Las monedas se ganan al final de cada partida.</p>
+        <button class="btn btn-ghost btn-sm" data-panel-jump="settings"><svg class="icon"><use href="#i-settings"/></svg> AJUSTES</button>
+      </footer>
+    </section>
+
+    <section id="panel-achievements" class="panel hidden" role="dialog" aria-modal="true" aria-labelledby="achievementsTitle">
+      <header class="panel-head">
+        <div>
+          <span class="panel-kicker">REGISTRO DE HAZAÑAS</span>
+          <h2 id="achievementsTitle">LOGROS</h2>
+        </div>
+        <div class="panel-head-right">
+          <div class="pill achieve-pill"><svg class="icon"><use href="#i-achievement"/></svg><b id="achievementCount">0</b><span>/</span><b id="achievementTotal">0</b></div>
+          <button class="icon-btn panel-close" data-close="1" aria-label="Cerrar"><svg class="icon"><use href="#i-close"/></svg></button>
+        </div>
+      </header>
+      <div class="panel-scroll">
+        <div class="achievement-banner">
+          <div>
+            <span class="panel-kicker">PROGRESO PERMANENTE</span>
+            <p>Los logros se desbloquean solos y entregan monedas, dulces o piezas de aspecto. No hay que reclamarlos.</p>
+          </div>
+          <div class="achievement-progress"><i id="achievementBar"></i></div>
+        </div>
+        <div id="achievementsList" class="achievement-grid"></div>
+      </div>
+      <footer class="panel-foot">
+        <p><b>CONSEJO:</b> juega eventos, encadena combos y compra aspectos para completar el registro.</p>
+        <button class="btn btn-ghost btn-sm" data-panel-jump="hangar"><svg class="icon"><use href="#i-shop"/></svg> HANGAR</button>
+      </footer>
+    </section>
+
+    <section id="panel-settings" class="panel hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <header class="panel-head">
+        <div>
+          <span class="panel-kicker">SISTEMA</span>
+          <h2 id="settingsTitle">AJUSTES</h2>
+        </div>
+        <div class="panel-head-right">
+          <button class="icon-btn panel-close" data-close="1" aria-label="Cerrar"><svg class="icon"><use href="#i-close"/></svg></button>
+        </div>
+      </header>
+      <div class="panel-scroll settings-scroll">
+        <div class="settings-block">
+          <h3><svg class="icon"><use href="#i-theme"/></svg> TEMÁTICA</h3>
+          <div class="theme-grid" id="themeChoices">
+            <button class="theme-card" data-theme-choice="aurora">
+              <span class="theme-swatch aurora"><i></i><i></i><i></i></span>
+              <b>AURORA</b><small>Calma · menta y durazno</small>
+            </button>
+            <button class="theme-card" data-theme-choice="neon">
+              <span class="theme-swatch neon"><i></i><i></i><i></i></span>
+              <b>NEÓN</b><small>Arcade · cian y magenta</small>
+            </button>
+            <button class="theme-card" data-theme-choice="ocean">
+              <span class="theme-swatch ocean"><i></i><i></i><i></i></span>
+              <b>OCÉANO</b><small>Profundo · azul y coral</small>
+            </button>
+            <button class="theme-card theme-card-event" data-theme-choice="halloween">
+              <span class="theme-swatch halloween"><i></i><i></i><i></i></span>
+              <b>HALLOWEEN</b><small>Terror · calabaza y violeta</small>
+            </button>
+            <button class="theme-card" data-theme-choice="fiesta">
+              <span class="theme-swatch fiesta"><i></i><i></i><i></i></span>
+              <b>FIESTA</b><small>Animado · confeti y neón</small>
+            </button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Movimiento</b><span>Suaviza cámara, destellos y partículas</span></div>
+            <div class="segmented" id="motionSeg">
+              <button data-motion-choice="soft">SUAVE</button>
+              <button data-motion-choice="full">COMPLETO</button>
+              <button data-motion-choice="reduced">REDUCIDO</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-block">
+          <h3><svg class="icon"><use href="#i-sound"/></svg> AUDIO</h3>
+          <div class="setting-row">
+            <div class="setting-label"><b>Música</b><span>Ambiente sereno adaptado a la temática</span></div>
+            <div class="range-wrap"><input id="setMusic" type="range" min="0" max="100" value="46"><output id="setMusicVal">46</output></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Efectos</b><span>Comer, turbo, impactos e interfaz</span></div>
+            <div class="range-wrap"><input id="setSfx" type="range" min="0" max="100" value="68"><output id="setSfxVal">68</output></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Subtítulos de sonido</b><span>Muestra avisos visuales de cada sonido importante</span></div>
+            <button id="setCaptions" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Vibración táctil</b><span>Pulsos breves al acelerar, lograr una baja o caer</span></div>
+            <button id="setHaptics" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+        </div>
+
+        <div class="settings-block">
+          <h3><svg class="icon"><use href="#i-keyboard"/></svg> CONTROLES</h3>
+          <div class="setting-row">
+            <div class="setting-label"><b>Método principal</b><span>Puedes combinar teclado, ratón, táctil o mando</span></div>
+          </div>
+          <div class="control-modes" id="controlModes">
+            <button data-control-mode="auto"><svg class="icon"><use href="#i-spark"/></svg><b>AUTO</b><small>Se adapta</small></button>
+            <button data-control-mode="mouse"><svg class="icon"><use href="#i-speed"/></svg><b>RATÓN</b><small>Apuntar</small></button>
+            <button data-control-mode="keys"><svg class="icon"><use href="#i-keyboard"/></svg><b>TECLADO</b><small>WASD / IJKL</small></button>
+            <button data-control-mode="touch"><svg class="icon"><use href="#i-arrow"/></svg><b>DEDO</b><small>Arrastrar</small></button>
+            <button data-control-mode="joystick"><svg class="icon"><use href="#i-stick"/></svg><b>JOYSTICK</b><small>Virtual</small></button>
+            <button data-control-mode="dpad"><svg class="icon"><use href="#i-gamepad"/></svg><b>BOTONES</b><small>Cruceta</small></button>
+            <button data-control-mode="gamepad"><svg class="icon"><use href="#i-gamepad"/></svg><b>MANDO</b><small>USB / BT</small></button>
+            <button data-control-mode="hybrid"><svg class="icon"><use href="#i-users"/></svg><b>HÍBRIDO</b><small>Todo a la vez</small></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Sensibilidad</b><span>Velocidad de giro con ratón y joystick</span></div>
+            <div class="range-wrap"><input id="setSensitivity" type="range" min="50" max="150" step="5" value="100"><output id="setSensitivityVal">100</output></div>
+          </div>
+          <div class="control-grid">
+            <div class="control-card"><span class="keycap wide">WASD · FLECHAS · IJKL</span><b>DIRIGIR</b></div>
+            <div class="control-card"><span class="keycap wide">ESPACIO · SHIFT · CLIC</span><b>TURBO</b></div>
+            <div class="control-card"><span class="keycap wide">ESC · P</span><b>PAUSA</b></div>
+            <div class="control-card"><span class="keycap wide">M · F · R</span><b>SONIDO · PANTALLA · REINICIO</b></div>
+            <div class="control-card"><span class="keycap wide">TECLADO NUMÉRICO</span><b>DIRIGIR</b></div>
+            <div class="control-card"><span class="keycap wide">MANDO</span><b>STICK · A · START</b></div>
+          </div>
+        </div>
+
+        <div class="settings-block">
+          <h3><svg class="icon"><use href="#i-eye"/></svg> VISIÓN DE ARENA</h3>
+          <div class="setting-row">
+            <div class="setting-label"><b>Minimapa</b><span>Muéstralo en la esquina inferior derecha</span></div>
+            <button id="setMinimap" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Nombres sobre rivales</b><span>Etiquetas de identidad durante la partida</span></div>
+            <button id="setNameTags" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Zoom de cámara</b><span>Más cerca para precisión o más lejos para leer la arena</span></div>
+            <div class="range-wrap"><input id="setCameraScale" type="range" min="88" max="112" step="4" value="100"><output id="setCameraScaleVal">100</output></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Destellos de impacto</b><span>Destellos rojos y avisos de peligro en los bordes</span></div>
+            <button id="setFlashes" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Avisos de potenciador</b><span>Mensajes al recoger invencibilidad, imán, bono o visión</span></div>
+            <button id="setPowerAlerts" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+        </div>
+
+        <div class="settings-block">
+          <h3><svg class="icon"><use href="#i-speed"/></svg> RENDIMIENTO</h3>
+          <div class="setting-row">
+            <div class="setting-label"><b>Calidad gráfica</b><span>Más detalle o más fluidez en móviles</span></div>
+            <div class="segmented" id="qualitySeg">
+              <button data-quality="auto">AUTO</button>
+              <button data-quality="low">BAJA</button>
+              <button data-quality="medium">MEDIA</button>
+              <button data-quality="high">ALTA</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Ajuste automático</b><span>Baja la calidad si detecta tirones</span></div>
+            <button id="setAutoQuality" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Contador de FPS</b><span>Diagnóstico de fluidez en pantalla</span></div>
+            <button id="setFps" class="switch" role="switch" aria-checked="false"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Partículas</b><span>Chispas, rastros y explosiones</span></div>
+            <button id="setParticles" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Sacudida de cámara</b><span>Impactos y muertes cercanas</span></div>
+            <button id="setShake" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+        </div>
+
+        <div class="settings-block">
+          <h3><svg class="icon"><use href="#i-accessibility"/></svg> ACCESIBILIDAD</h3>
+          <div class="setting-row">
+            <div class="setting-label"><b>Alto contraste</b><span>Bordes y textos más definidos</span></div>
+            <button id="setHighContrast" class="switch" role="switch" aria-checked="false"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Interfaz grande</b><span>Aumenta textos y controles táctiles</span></div>
+            <button id="setLargeUI" class="switch" role="switch" aria-checked="false"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Paleta para daltonismo</b><span>Refuerza la diferencia entre serpientes</span></div>
+            <select id="setColorblind" class="select">
+              <option value="none">Ninguna</option>
+              <option value="deuter">Deuteranopía</option>
+              <option value="prot">Protanopía</option>
+              <option value="trit">Tritanopía</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Pausa al salir</b><span>Pausa al cambiar de pestaña o perder el foco</span></div>
+            <button id="setPauseBlur" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Ayudas en pantalla</b><span>Consejos de control y etiquetas del HUD</span></div>
+            <button id="setHints" class="switch on" role="switch" aria-checked="true"><span></span></button>
+          </div>
+        </div>
+
+        <div class="settings-block">
+          <h3><svg class="icon"><use href="#i-home"/></svg> DATOS Y PANTALLA</h3>
+          <div class="setting-row">
+            <div class="setting-label"><b>Progreso guardado</b><span id="saveInfo">—</span></div>
+            <button id="btnReset" class="btn btn-danger btn-sm">BORRAR PROGRESO</button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Restablecer ajustes</b><span>Conserva monedas, skins y mejoras</span></div>
+            <button id="btnResetSettings" class="btn btn-ghost btn-sm">RESTABLECER</button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><b>Pantalla completa</b><span>Sumérgete en la arena</span></div>
+            <button id="btnFullscreen2" class="btn btn-ghost btn-sm"><svg class="icon"><use href="#i-fullscreen"/></svg> ACTIVAR</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-help" class="panel hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <header class="panel-head">
+        <div>
+          <span class="panel-kicker">MANUAL DE CAMPO</span>
+          <h2 id="helpTitle">CÓMO JUGAR</h2>
+        </div>
+        <div class="panel-head-right">
+          <button class="icon-btn panel-close" data-close="1" aria-label="Cerrar"><svg class="icon"><use href="#i-close"/></svg></button>
+        </div>
+      </header>
+      <div class="panel-scroll help-scroll">
+        <div class="help-intro">
+          <p>Eres una serpiente de luz en una arena circular. Come orbes, crece y haz que tus rivales choquen contra tu cuerpo. <b>Tu cabeza no perdona.</b></p>
+        </div>
+        <div class="help-grid">
+          <article class="help-card">
+            <div class="help-ico cyan"><svg class="icon"><use href="#i-magnet"/></svg></div>
+            <h3>1 · DEVORA</h3>
+            <p>Pasa sobre los orbes para ganar masa. Los orbes dorados valen mucho más, pero huyen de ti.</p>
+          </article>
+          <article class="help-card">
+            <div class="help-ico magenta"><svg class="icon"><use href="#i-bolt"/></svg></div>
+            <h3>2 · ACELERA</h3>
+            <p>Mantén el turbo con clic, espacio, el botón TURBO o el gatillo del mando. Consumes masa y dejas un rastro de orbes.</p>
+          </article>
+          <article class="help-card">
+            <div class="help-ico lime"><svg class="icon"><use href="#i-shield"/></svg></div>
+            <h3>3 · SOBREVIVE</h3>
+            <p>Si tu cabeza toca el cuerpo de otra serpiente o el muro, mueres. Tu propio cuerpo es seguro.</p>
+          </article>
+          <article class="help-card">
+            <div class="help-ico amber"><svg class="icon"><use href="#i-crown"/></svg></div>
+            <h3>4 · DOMINA</h3>
+            <p>Rodea a rivales más pequeños y cierra el círculo. Cuando choquen, devora su masa.</p>
+          </article>
+        </div>
+        <div class="help-powers">
+          <h3>POTENCIADORES DE ARENA</h3>
+          <div class="help-power-grid">
+            <article><span class="help-power-ico gold"><svg class="icon"><use href="#i-shield"/></svg></span><b>INVENCIBLE · 15 S</b><p>Atraviesa rivales y muros con turbo infinito. Brilla en dorado.</p></article>
+            <article><span class="help-power-ico pink"><svg class="icon"><use href="#i-magnet"/></svg></span><b>IMÁN · 30 S</b><p>Atrae orbes y dulces desde mucha más distancia.</p></article>
+            <article><span class="help-power-ico lime"><svg class="icon"><use href="#i-gem"/></svg></span><b>BONO · +175</b><p>Suma masa al instante. Ideal para remontar o iniciar una cacería.</p></article>
+            <article><span class="help-power-ico cyan"><svg class="icon"><use href="#i-eye"/></svg></span><b>VISIÓN · 20 S</b><p>Aleja la cámara para anticipar trampas y rivales lejanos.</p></article>
+          </div>
+        </div>
+        <div class="help-tips">
+          <h3>TÁCTICAS DE ÉLITE</h3>
+          <ul>
+            <li><span>01</span> Nunca cruces en línea recta un rastro de comida: divide el banquete y crea una trampa.</li>
+            <li><span>02</span> Al crecer, gira en círculos amplios; tu radio de giro también aumenta.</li>
+            <li><span>03</span> Usa el borde de la arena para acorralar a otros... sin acercarte demasiado.</li>
+            <li><span>04</span> El turbo es tu última carta: gástalo para cortar el paso, no para huir sin rumbo.</li>
+            <li><span>05</span> Los orbes dorados huyen del peligro. Acorralarlos contra el muro es rentable.</li>
+          </ul>
+        </div>
+        <div class="help-mobile">
+          <svg class="icon"><use href="#i-arrow"/></svg>
+          <p>En móvil puedes arrastrar el dedo, usar el joystick o la cruceta. Cambia el control y ajusta la sensibilidad en <b>Ajustes</b>.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== EVENTO HALLOWEEN ===================== -->
+  <div id="eventOverlay" class="overlay event-overlay hidden">
+    <div class="overlay-deco event-deco" aria-hidden="true"></div>
+    <div class="event-card glass-card" role="dialog" aria-modal="true" aria-labelledby="eventTitle">
+      <div class="event-pumpkins" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="event-card-head">
+        <span class="event-tag"><svg class="icon"><use href="#i-moon"/></svg> EVENTO LIMITADO</span>
+        <h2 id="eventTitle" class="overlay-title" data-text="HALLOWEEN">HALLOWEEN</h2>
+        <p class="overlay-sub">La arena se cubre de calabazas. Los orbes se vuelven dulces y cada partida entrega caramelos para la tienda del evento.</p>
+      </div>
+      <div class="event-rewards">
+        <div class="event-reward"><span class="event-ico candy"><svg class="icon"><use href="#i-candy"/></svg></span><b>DULCES</b><small>Moneda exclusiva del evento</small></div>
+        <div class="event-reward"><span class="event-ico pumpkin"><svg class="icon"><use href="#i-pumpkin"/></svg></span><b>ARENA DE TERROR</b><small>Calabazas, murciélagos y potenciadores gigantes</small></div>
+        <div class="event-reward"><span class="event-ico ghost"><svg class="icon"><use href="#i-ghost"/></svg></span><b>TIENDA ESPELUZNANTE</b><small>Pieles, ropa y accesorios solo por dulces</small></div>
+      </div>
+      <div class="event-balance">
+        <span>TU BOLSA DE DULCES</span>
+        <b><svg class="icon"><use href="#i-candy"/></svg><span id="eventCandy">0</span></b>
+      </div>
+      <div class="event-mode-title"><span>ELIGE CÓMO JUGAR</span><em>Empezarás desde la base, con tus mejoras permanentes activas.</em></div>
+      <div class="event-mode-picker" role="group" aria-label="Modo del evento Halloween">
+        <button id="eventModeBots" class="event-mode-choice active" data-event-mode="bots">
+          <svg class="icon"><use href="#i-bot"/></svg>
+          <span><b>BOTS</b><small>Arena de terror con IA</small></span>
+          <em>RECOMENDADO</em>
+        </button>
+        <button id="eventModeOnline" class="event-mode-choice" data-event-mode="online">
+          <svg class="icon"><use href="#i-users"/></svg>
+          <span><b>MULTIJUGADOR</b><small>Elige región y sala</small></span>
+        </button>
+      </div>
+      <p id="eventModeNote" class="event-note">Se usará la dificultad guardada. Puedes cambiarla en el menú principal.</p>
+      <div class="event-actions">
+        <button id="eventStart" class="btn btn-primary btn-event"><svg class="icon"><use href="#i-pumpkin"/></svg> ENTRAR AL EVENTO</button>
+        <button id="eventShopOpen" class="btn btn-ghost btn-event-shop"><svg class="icon"><use href="#i-candy"/></svg> TIENDA DE DULCES</button>
+      </div>
+      <button id="eventClose" class="text-btn"><svg class="icon"><use href="#i-arrow"/></svg> VOLVER AL MENÚ</button>
+    </div>
+  </div>
+
+  <div id="eventShop" class="overlay event-shop-overlay hidden">
+    <div class="overlay-deco event-deco" aria-hidden="true"></div>
+    <div class="event-shop glass-card" role="dialog" aria-modal="true" aria-labelledby="eventShopTitle">
+      <header class="event-shop-head">
+        <div>
+          <span class="event-tag"><svg class="icon"><use href="#i-candy"/></svg> SOLO DULCES</span>
+          <h2 id="eventShopTitle">TIENDA DE HALLOWEEN</h2>
+          <p>Piezas espeluznantes de edición limitada. No se compran con monedas.</p>
+        </div>
+        <div class="event-shop-head-right">
+          <div class="pill candy-pill"><svg class="icon"><use href="#i-candy"/></svg><b id="eventShopCandy">0</b></div>
+          <button id="eventShopClose" class="icon-btn" aria-label="Cerrar tienda"><svg class="icon"><use href="#i-close"/></svg></button>
+        </div>
+      </header>
+      <div class="event-shop-scroll">
+        <div id="eventShopList" class="event-shop-list"></div>
+      </div>
+      <footer class="event-shop-foot">
+        <p><b>RECUERDA:</b> los dulces se ganan al terminar o caer en el evento. Las piezas compradas quedan para siempre.</p>
+        <button id="eventShopBack" class="btn btn-ghost btn-sm"><svg class="icon"><use href="#i-arrow"/></svg> VOLVER AL EVENTO</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===================== SERVIDORES ONLINE ===================== -->
+  <div id="serverBrowser" class="overlay server-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="serverTitle">
+    <div class="overlay-deco" aria-hidden="true"></div>
+    <div class="server-card glass-card">
+      <header class="server-head">
+        <div class="server-heading">
+          <span class="panel-kicker"><span class="live-dot"></span> RED MULTIJUGADOR · WEBSOCKET</span>
+          <h2 id="serverTitle" class="overlay-title small">ELIGE TU SERVIDOR</h2>
+          <p class="overlay-sub">Entra a la arena de tu país o visita otro servidor. Todos juegan en la misma red.</p>
+        </div>
+        <button id="serverBrowserClose" class="icon-btn server-close" type="button" aria-label="Cerrar servidores" title="Cerrar (Esc)">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </header>
+
+      <div class="server-topline">
+        <div class="server-stat"><span>TU REGIÓN</span><b id="serverRecommended">DETECTANDO...</b></div>
+        <div class="server-stat"><span>EN LÍNEA</span><b id="serverTotal">0 jugadores</b></div>
+        <div class="server-stat"><span>NODO</span><b id="serverNode">Nodo principal</b></div>
+        <div class="server-stat"><span>PING</span><b id="serverPing">— ms</b></div>
+      </div>
+
+      <div class="server-body">
+        <section class="server-pane server-region-pane" aria-label="Regiones">
+          <div class="server-pane-head">
+            <span>REGIÓN / PAÍS</span>
+            <small>Servidores visibles</small>
+          </div>
+          <div id="serverRegions" class="server-regions"></div>
+        </section>
+        <section class="server-pane server-room-pane" aria-label="Salas">
+          <div class="server-pane-head">
+            <span id="serverRoomTitle">SALAS DISPONIBLES</span>
+            <small>Elige una arena</small>
+          </div>
+          <div id="serverRooms" class="server-rooms"></div>
+        </section>
+      </div>
+
+      <footer class="server-foot">
+        <button id="serverQuickJoin" class="btn btn-primary" type="button">
+          <svg class="icon"><use href="#i-users"/></svg>
+          JUGAR EN MI REGIÓN
+        </button>
+        <button id="serverRefresh" class="btn btn-ghost" type="button">
+          <svg class="icon"><use href="#i-retry"/></svg>
+          ACTUALIZAR
+        </button>
+        <span id="serverStatus" class="server-status" role="status">Conectando con la red...</span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===================== PAUSE ===================== -->
+  <div id="pauseOverlay" class="overlay hidden">
+    <div class="overlay-deco" aria-hidden="true"></div>
+    <div class="pause-card glass-card">
+      <span class="panel-kicker">SISTEMA EN ESPERA</span>
+      <h2 class="overlay-title small">PAUSA</h2>
+      <p class="overlay-sub">La arena sigue respirando. Tú decides cuándo volver.</p>
+      <div class="pause-score">
+        <div><span>MASA</span><b id="pauseScore">0</b></div>
+        <div><span>RANGO</span><b id="pauseRank">#—</b></div>
+        <div><span>TIEMPO</span><b id="pauseTime">0:00</b></div>
+      </div>
+      <div class="pause-actions">
+        <button id="btnResume" class="btn btn-primary"><svg class="icon"><use href="#i-play"/></svg> CONTINUAR</button>
+        <button id="btnPauseSettings" class="btn btn-ghost"><svg class="icon"><use href="#i-settings"/></svg> AJUSTES</button>
+        <button id="btnPauseQuit" class="btn btn-ghost danger-text"><svg class="icon"><use href="#i-home"/></svg> SALIR AL MENÚ</button>
+      </div>
+      <div id="pauseHint" class="pause-hint"><span class="keycap">ESC</span> para continuar</div>
+    </div>
+  </div>
+
+  <!-- ===================== GAME OVER ===================== -->
+  <div id="gameOver" class="overlay hidden">
+    <div class="overlay-deco danger" aria-hidden="true"></div>
+    <div class="go-card glass-card">
+      <div class="go-top">
+        <span class="panel-kicker danger-text">SEÑAL PERDIDA</span>
+        <h2 class="overlay-title" data-text="ELIMINADO">ELIMINADO</h2>
+        <p id="goCause" class="overlay-sub">Chocaste contra el muro de contención.</p>
+      </div>
+      <div class="go-main">
+        <div class="go-score-box">
+          <span>PUNTAJE FINAL</span>
+          <b id="goScore">0</b>
+          <div id="goNewBest" class="new-best hidden"><svg class="icon"><use href="#i-crown"/></svg> NUEVO RÉCORD</div>
+          <div class="go-best-line">RÉCORD <b id="goBest">0</b></div>
+        </div>
+        <div class="go-stats">
+          <div><svg class="icon"><use href="#i-speed"/></svg><span>MASA</span><b id="goLength">0</b></div>
+          <div><svg class="icon"><use href="#i-crown"/></svg><span>BAJAS</span><b id="goKills">0</b></div>
+          <div><svg class="icon"><use href="#i-trophy"/></svg><span>RANGO FINAL</span><b id="goRank">#—</b></div>
+          <div><svg class="icon"><use href="#i-gem"/></svg><span>ORBES</span><b id="goOrbs">0</b></div>
+          <div><svg class="icon"><use href="#i-speed"/></svg><span>TIEMPO</span><b id="goTime">0:00</b></div>
+          <div><svg class="icon"><use href="#i-bolt"/></svg><span>MEJOR COMBO</span><b id="goCombo" class="gold-text">x0</b></div>
+        </div>
+      </div>
+      <div id="goTotal" class="go-total">
+        <span id="goRewardLabel">MONEDAS GANADAS</span>
+        <b id="goCoins">+0</b>
+        <div class="go-coin-row"><svg class="icon"><use id="goTotalIconUse" href="#i-coin"/></svg><span id="goTotalCoins">0</span> <span id="goTotalLabel">EN BÓVEDA</span></div>
+      </div>
+      <div class="go-actions">
+        <button id="btnRetry" class="btn btn-primary"><svg class="icon"><use href="#i-retry"/></svg> REINTENTAR <span class="keycap">R</span></button>
+        <button id="btnGoHangar" class="btn btn-ghost"><svg class="icon"><use href="#i-shop"/></svg> HANGAR</button>
+        <button id="btnGoMenu" class="btn btn-ghost"><svg class="icon"><use href="#i-home"/></svg> MENÚ</button>
+      </div>
+      <button id="btnCopyScore" class="text-btn"><svg class="icon"><use href="#i-copy"/></svg> COPIAR RESULTADO</button>
+    </div>
+  </div>
+
+  <div id="rotateHint" class="rotate-hint hidden">
+    <svg class="icon"><use href="#i-retry"/></svg>
+    <p>Gira tu dispositivo para una experiencia completa</p>
+  </div>
+
+  <div id="fpsTag" class="fps-tag hidden">60 FPS</div>
+</div>
+
+<script src="audio.js"></script>
+<script src="core.js"></script>
+<script src="entities.js"></script>
+<script src="renderer.js"></script>
+<script src="online.js"></script>
+<script src="ui.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

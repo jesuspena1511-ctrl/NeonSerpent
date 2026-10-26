@@ -1,0 +1,32 @@
+{
+  "name": "neon-serpent",
+  "version": "2.0.0",
+  "description": "Neon Serpent — arena online multijugador",
+  "productName": "Neon Serpent",
+  "main": "main.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "start:electron": "electron .",
+    "build": "electron-packager . NeonSerpent --platform=win32 --arch=x64 --out=dist --overwrite --extra-resource=online-config.json"
+  },
+  "keywords": [
+    "game",
+    "multiplayer",
+    "websocket",
+    "neon",
+    "serpent"
+  ],
+  "author": "JesusDaniel",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-packager": "^17.1.2"
+  }
+}

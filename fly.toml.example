@@ -1,0 +1,25 @@
+# Copia este archivo como fly.toml y cambia "app" por tu nombre único.
+app = "neon-serpent-tu-nombre"
+primary_region = "mia"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  NODE_ID = "mia-1"
+  NODE_LABEL = "Miami · Nodo principal"
+  # HOSTED_REGIONS = "usa,mexico"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 250
+    soft_limit = 200
